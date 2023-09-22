@@ -19,6 +19,14 @@ namespace WebAPI1.Controllers
         public List<Employee> AllEmployee()
         {
             return _context.GetEmployees();
-        }    
+        }
+        [HttpPost]
+        public Employee UpdateEmployee(int id, [FromBody] Employee emp)
+        {
+            emp.EmployeeId = id;
+            Employee savedemp = _context.UpdateEmployee(emp);
+            return savedemp;
+
+        }
     }
 }

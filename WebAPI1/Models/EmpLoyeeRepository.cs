@@ -13,5 +13,15 @@ namespace WebAPI1.Models
         {
             return _context.Employees.ToList();
         }
+        public Employee UpdateEmployee(Employee updatedEmployee)
+        {
+
+
+
+            _context.Employees.Attach(updatedEmployee);
+            _context.SaveChanges();
+            return updatedEmployee;
+
+        }
     }
 }
