@@ -1,70 +1,67 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using WebAPI1.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Contracts;
-using System.Reflection.Metadata.Ecma335;
-using WebAPI1.Models;
+using FirstWebAPILink.Models;
 
-namespace WebAPI1.Controllers
+namespace FirstWebAPILink.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private EmpLoyeeRepository _context;
-        public EmployeeController(EmpLoyeeRepository context)
+        private EmployeeRepository _repositoryEmployee;
+        public EmployeeController(EmployeeRepository repository)
         {
-            _context = context;
+            _repositoryEmployee = repository;
         }
-
-        [HttpGet("/api/AllEmpoyee")]
-        public IEnumerable<EmpViewModel> GetAllEmployees()
+        [HttpGet("/ListAllEmployees")]
+        public IEnumerable<EmpViewModel> ListAllEmployees()
         {
-            List<Employee> employees = _context.GetEmployees();
-            var empList = (
-                from emp in employees
-                select new EmpViewModel()
-                {
-                    EmpId = emp.EmployeeId,
-                    FirstName = emp.FirstName,
-                    LastName = emp.LastName,
-                    BirthDate = emp.BirthDate,
-                    HireDate = emp.HireDate,
-                    Title = emp.Title,
-                    City = emp.City,
-                    ReportsTo = emp.ReportsTo
-                }
-                ).ToList();
+            List<Employee> employees = _repositoryEmployee.AllEmployees();
+            IEnumerable<EmpViewModel> empList = _repositoryEmployee.Lister(employees);
             return empList;
         }
-        
-        [HttpGet("/GetEmployeeById")]
-        public Employee GetEmployeeById(int empId)
+        [HttpGet("/FindEmployee")]
+        public EmpViewModel FindEmployee(int id)
         {
-            return _context.FindEmployee(empId);
+            Employee employeeById = _repositoryEmployee.FindEmpoyeeById(id);
+            EmpViewModel empList = _repositoryEmployee.Viewer(employeeById);
+            return empList;
         }
-        [HttpPut]
-        public Employee  AddEmployee([FromBody]Employee emp)
+        [HttpPost("/AddEmployee")]
+        public string AddEmployee(EmpViewModel newEmployeeView)
         {
-            Employee addedemp = _context.InsertEmployee(emp);
-            return addedemp;
-        }
-        [HttpPost]
-        public Employee UpdateEmployee(int id, [FromBody] Employee emp)
-        {
-            emp.EmployeeId = id;
-            Employee savedemp = _context.UpdateEmployee(emp);
-            return savedemp;
-        }
-        [HttpDelete]
-        public void RemoveEmployee(int id)
-        {
-            Employee emp = _context.FindEmployee(id);
-            if (emp != null)
+            Employee newEmployee = _repositoryEmployee.ViewToEmp(newEmployeeView);
+            int employeestatus = _repositoryEmployee.AddEmployee(newEmployee);
+            if (employeestatus == 0)
             {
-                _context.DeleteEmployee(id);
+                return "Employee Not Added To Database Since it already exist";
             }
-
+            else
+            {
+                return "Employee Added To Database";
+            }
         }
-
+        [HttpPut("/ModifyEmployee")]
+        public Employee ModifyEmployee(int id, [FromBody] EmpViewModel newEmployeeView)
+        {
+            Employee newEmployee = _repositoryEmployee.FindEmpoyeeById(id);
+            newEmployee = _repositoryEmployee.ViewToEmp(newEmployeeView);
+            _repositoryEmployee.UpdateEmployee(newEmployee);
+            return newEmployee;
+        }
+        [HttpDelete("/DeleteEmployee")]
+        public string DeleteEmployee(int id)
+        {
+            int employeestatus = _repositoryEmployee.DeleteEmployee(id);
+            if (employeestatus == 0)
+            {
+                return "Employee does not exist in the Database";
+            }
+            else
+            {
+                return "Employee Successfully Deleted";
+            }
+        }
     }
 }

@@ -1,3 +1,4 @@
+using FirstWebAPILink.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using WebAPI1.Models;
@@ -11,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<NorthwindContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("NWindConnection")));
-builder.Services.AddScoped<EmpLoyeeRepository>();
+builder.Services.AddScoped<EmployeeRepository>();
 builder.Services.AddControllersWithViews().AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 builder.Services.AddControllersWithViews().AddJsonOptions(options => { options.JsonSerializerOptions.MaxDepth = 32; });
 

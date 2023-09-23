@@ -1,49 +1,84 @@
-﻿using System.Diagnostics.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Numerics;
+using WebAPI1.Models;
 
-namespace WebAPI1.Models
+
+
+namespace FirstWebAPILink.Models
 {
-    public class EmpLoyeeRepository
+    public class EmployeeRepository
     {
         private NorthwindContext _context;
-         public EmpLoyeeRepository (NorthwindContext context)
+        public EmployeeRepository(NorthwindContext context)
         {
             _context = context;
         }
-       public List<Employee> GetEmployees()
+        public List<Employee> AllEmployees()
         {
             return _context.Employees.ToList();
         }
-        public Employee InsertEmployee(Employee employee)
+        public Employee FindEmpoyeeById(int id)
         {
-            _context.Employees.Add(employee);
-            _context.SaveChanges();
-            return employee;
-           
+            return _context.Employees.Find(id);
         }
-       
-        public Employee FindEmployee(int employeeId)
+        public int AddEmployee(Employee newEmployee)
         {
-            return _context.Employees.Find(employeeId);
+            _context.Employees.Add(newEmployee);
+            return _context.SaveChanges();
         }
-        public Employee UpdateEmployee(Employee updatedEmployee)
+        public int UpdateEmployee(Employee emp)
         {
-            _context.Employees.Update(updatedEmployee);
-            _context.SaveChanges();
-            return updatedEmployee;
-
+            _context.Employees.Update(emp);
+            return _context.SaveChanges();
         }
-        public void DeleteEmployee(int employeeId)
+        public int DeleteEmployee(int id)
         {
-            var emp = _context.Employees.Find(employeeId);
-            if (emp != null)
-            {
-                _context.Employees.Remove(emp);
-                _context.SaveChanges();
-            }
-            else
-            {
-                Console.WriteLine("employee doesn not exist");
-            }
+            Employee emp = _context.Employees.Find(id);
+            _context.Employees.Remove(emp);
+            return _context.SaveChanges();
+        }
+        public IEnumerable<EmpViewModel> Lister(List<Employee> employees)
+        {
+            List<EmpViewModel> empList = (
+                from emp in employees
+                select new EmpViewModel()
+                {
+                    EmpId = emp.EmployeeId,
+                    FirstName = emp.FirstName,
+                    LastName = emp.LastName,
+                    BirthDate = emp.BirthDate,
+                    HireDate = emp.HireDate,
+                    Title = emp.Title,
+                    City = emp.City,
+                    ReportsTo = emp.ReportsTo
+                }
+                ).ToList();
+            return empList;
+        }
+        public EmpViewModel Viewer(Employee employee)
+        {
+            EmpViewModel employeeView = new EmpViewModel();
+            employeeView.EmpId = employee.EmployeeId;
+            employeeView.FirstName = employee.FirstName;
+            employeeView.LastName = employee.LastName;
+            employeeView.BirthDate = employee.BirthDate;
+            employeeView.HireDate = employee.HireDate;
+            employeeView.Title = employee.Title;
+            employeeView.City = employee.City;
+            employeeView.ReportsTo = employee.ReportsTo;
+            return employeeView;
+        }
+        public Employee ViewToEmp(EmpViewModel newEmployeeView)
+        {
+            Employee newEmployee = new Employee();
+            newEmployee.FirstName = newEmployeeView.FirstName;
+            newEmployee.LastName = newEmployeeView.LastName;
+            newEmployee.BirthDate = newEmployeeView.BirthDate;
+            newEmployee.HireDate = newEmployeeView.HireDate;
+            newEmployee.Title = newEmployeeView.Title;
+            newEmployee.City = newEmployeeView.City;
+            newEmployee.ReportsTo = newEmployeeView.ReportsTo;
+            return newEmployee;
         }
     }
 }
